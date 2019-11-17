@@ -90,7 +90,7 @@ PromptInput(
 			break;
 	}
 
-	Print(L"%c\n\n", SelectedChar);
+	Print(L"%c\r\n\r\n", SelectedChar);
 	return SelectedChar;
 }
 
@@ -252,7 +252,7 @@ BdsLibConnectAllDriversToAllControllers(
 
 		//
 		// Check to see if it's possible to dispatch an more DXE drivers.
-		// The BdsLibConnectAllEfi () may have made new DXE drivers show up.
+		// The BdsLibConnectAllEfi() may have made new DXE drivers show up.
 		// If anything is Dispatched Status == EFI_SUCCESS and we will try
 		// the connect again.
 		//
@@ -397,7 +397,7 @@ TryBootOptionsInOrder(
 		//
 		// This is us
 		//
-		if (Index == CurrentBootOptionIndex)
+		if (BootOptions[Index].OptionNumber == CurrentBootOptionIndex)
 			continue;
 
 		//
@@ -475,12 +475,12 @@ TryBootOptionsInOrder(
 		EfiSignalEventReadyToBoot();
 
 		// So again, DO NOT call this abortion:
-		//BmSetMemoryTypeInformationVariable((BOOLEAN)((BootOption->Attributes & LOAD_OPTION_CATEGORY) == LOAD_OPTION_CATEGORY_BOOT));
+		//BmSetMemoryTypeInformationVariable((BOOLEAN)((BootOptions[Index].Attributes & LOAD_OPTION_CATEGORY) == LOAD_OPTION_CATEGORY_BOOT));
 
 		// Ensure the image path is connected end-to-end by Dispatch()ing any required drivers through DXE services
 		EfiBootManagerConnectDevicePath(BootOptions[Index].FilePath, NULL);
 
-		// Instead of creating a ramdisk and reading the file into it (Â¿que?), just pass the path we saved earlier.
+		// Instead of creating a ramdisk and reading the file into it (¿que?), just pass the path we saved earlier.
 		// This is the point where the driver kicks in via its LoadImage hook.
 		EFI_HANDLE ImageHandle = NULL;
 		Status = gBS->LoadImage(TRUE,
@@ -538,7 +538,7 @@ TryBootOptionsInOrder(
 		gBS->SetWatchdogTimer(0x0000, 0x0000, 0x0000, NULL);
 
 		// Clear the BootCurrent variable
-		gRT->SetVariable(L"BootCurrent",
+		gRT->SetVariable(EFI_BOOT_CURRENT_VARIABLE_NAME,
 						&gEfiGlobalVariableGuid,
 						0,
 						0,
